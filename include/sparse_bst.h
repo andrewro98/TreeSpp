@@ -24,9 +24,9 @@ class sparse_bst : public tree<T> {
   private:
     sparse_elt<T> * root;
 
-    sparse_elt<T> * interior_search(T & obj)
+    sparse_elt<T> * interior_search(T & obj, sparse_elt<T> * head = root)
     {
-      sparse_elt<T> * temp = root;
+      sparse_elt<T> * temp = head;
       while(temp)
       {
         if(obj < temp->object)
@@ -45,14 +45,14 @@ class sparse_bst : public tree<T> {
       return nullptr;
     }
 
-    sparse_elt<T> * interior_search_parent(T & obj)
+    sparse_elt<T> * interior_search_parent(T & obj, sparse_elt<T> * head = root)
     {
-      if(root && root->object == obj)
+      if(head && head->object == obj)
       {
         return nullptr;
       }
-      sparse_elt<T> * temp = root;
-      sparse_elt<T> * par = root;
+      sparse_elt<T> * temp = head;
+      sparse_elt<T> * par = head;
       while(temp)
       {
         if(obj < temp->object)
@@ -71,6 +71,63 @@ class sparse_bst : public tree<T> {
         }
       }
       throw FailedFindException();
+    }
+
+    void erase(T & obj, sparse_elt<T> * head = root)
+    {
+      sparse_elt<T> * parent = head;
+      sparse_elt<T> * to_delete;
+      if(parent->left && parent->object == obj)
+      {
+        to_delete = parent->left;
+      }
+      else
+      {
+        to_delete = parent->right;
+      }
+
+      // conditions: leaf, one child, two children
+      if(!(to_delete->left) && !(to_delete->right)) // leaf
+      {
+        if(to_delete == parent->left) parent->left = nullptr;
+        else parent->right = nullptr;
+        delete to_delete;
+      }
+      else if((to_delete->left) && (to_delete->right)) // two children
+      {
+        sparse_elt<T> * next = to_delete->right;
+        sparse_elt<T> * next_parent = to_delete->right;
+        while(next->left)
+        {
+          next_parent = next;
+          next = next->left;
+        }
+        if(next_parent == next) // right child is next greatest
+        {
+          to_delete->right = next->right;
+          to_delete->object = next->object;
+          delete next;
+        }
+        else
+        {
+          next_parent->left = next->right;
+          to_delete->object = next->object;
+          delete next;
+        }
+      }
+      else // one child
+      {
+        if(to_delete->left) // left child
+        {
+          to_delete->object = to_delete->left->object;
+          erase(to_delete->left->object, to_delete);
+        }
+        else // right child
+        {
+          to_delete->object = to_delete->right->object;
+          erase(to_delete->right->object, to_delete);
+        }
+      }
     }
 
   public:
@@ -133,6 +190,7 @@ class sparse_bst : public tree<T> {
     }
     virtual bool erase(T & obj)
     {
+      this->number_of_elements--;
       sparse_elt<T> * parent;
       try{
         parent = interior_search_parent(obj);
@@ -140,7 +198,6 @@ class sparse_bst : public tree<T> {
         return false; // object not found
       }
 
-      this->number_of_elements--;
       if(!parent) // deleting root
       {
         if(!(root->left) && !(root->right)) // size == 1
@@ -167,58 +224,8 @@ class sparse_bst : public tree<T> {
         }
         return true;
       }
-
-      sparse_elt<T> * to_delete;
-      if(parent->left && parent->object == obj)
-      {
-        to_delete = parent->left;
-      }
-      else
-      {
-        to_delete = parent->right;
-      }
-
-      // conditions: leaf, one child, two children
-      if(!(to_delete->left) && !(to_delete->right)) // leaf
-      {
-        if(to_delete == parent->left) parent->left = nullptr;
-        else parent->right = nullptr;
-        delete to_delete;
-      }
-      else if((to_delete->left) && (to_delete->right)) // two children
-      {
-        sparse_elt<T> * next = to_delete->right;
-        sparse_elt<T> * next_parent = to_delete->right;
-        while(next->left)
-        {
-          next_parent = next;
-          next = next->left;
-        }
-        if(next_parent == next) // right child is next greatest
-        {
-          to_delete->right = next->right;
-          to_delete->object = next->object;
-          delete next;
-        }
-        else
-        {
-          next_parent->left = next->right;
-          to_delete->object = next->object;
-          delete next;
-        }
-      }
-      else // one child
-      {
-        // TODO TODO TODO need to modify functions to take a head * and only delete within the subtree
-        if(to_delete->left) // left child
-        {
-
-        }
-        else // right child
-        {
-
-        }
-      }
+      // else we need to use erase from the root
+      erase(obj, parent);
       return true;
     }
 };
