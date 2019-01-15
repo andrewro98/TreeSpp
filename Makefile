@@ -8,6 +8,9 @@ TEST 		 := ./test
 TESTBUILD := ./testbuild
 TESTEXE	 := ./testexe
 
+sparse_bst.o: $(INCLUDE)/sparse_bst.h $(INCLUDE)/tree.h $(INCLUDE)/exceptions.h
+	$(CXX) $(CXXFLAGS) -o $(BUILD)/sparse_bst.o -c $(INCLUDE)/sparse_bst.h
+
 dense_bst.o: $(INCLUDE)/dense_bst.h $(INCLUDE)/tree.h
 	$(CXX) $(CXXFLAGS) -o $(BUILD)/dense_bst.o -c $(INCLUDE)/dense_bst.h
 
