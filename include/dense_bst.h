@@ -1,10 +1,16 @@
 /*
-
+  TODO INCOMPLETE
   dense_bst.h
   Andrew Rosen Dec 2018
   Header file for dense binary search tree.
 
+  Important things to consider:
+    - the templated type T must have a default initialization
+    - the erase for this type is relatively slower than the erase for sparse/other bst's. This is inherent because of the array representation.
+  Takeaway:
+    This is best used for situations in which there is little erasing, and few sticks in the tree-- only use when your data can be inserted in a way that reduces sticks, or this data structure is not your best choice. Consider sparse_bst or any self-balancing tree.
 */
+
 
 #include "tree.h"
 #include <iostream>
@@ -131,7 +137,7 @@ class dense_bst : public tree<T> {
         // two children
         else if(index*2 <= current_capacity && !arr[index*2].empty && index*2 < current_capacity && !arr[index*2+1].empty)
         {
-          // TODO 
+          // TODO
         }
         else if(index*2 <= current_capacity && !arr[index*2].empty) // left child only
         {
@@ -147,7 +153,30 @@ class dense_bst : public tree<T> {
         }
       }
 
-
+    virtual T & find(const T & obj)
+    {
+      int index = 1;
+      while(index <= current_capacity && !arr[index].empty)
+      {
+        if(arr[index].obj < obj)
+        {
+          index*=2;
+        }
+        else if(arr[index].obj > obj)
+        {
+          index = index*2+1;
+        }
+        else /* we found the item to delete */
+        {
+          break;
+        }
+      }
+      if(index > current_capacity) // item not found
+      {
+        throw FailedFindException();
+      }
+      else return arr[index];
+    }
 
     }
     virtual ~dense_bst()

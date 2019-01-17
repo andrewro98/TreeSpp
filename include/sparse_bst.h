@@ -6,8 +6,6 @@
 
 */
 
-// TODO adjust to handle root invalidations -- partially done but could require more work/adjustments later
-
 #include "tree.h"
 #include "exceptions.h"
 #include <string>
@@ -15,24 +13,12 @@
 #include <iostream>
 
 template <typename T>
-class sparse_elt {
-  public:
-    T object;
-    sparse_elt * left;
-    sparse_elt * right;
-
-    sparse_elt(const T & _obj): object(_obj), left(nullptr), right(nullptr) {}
-};
+class sparse_elt;
 
 template <typename T>
 class sparse_bst : public tree<T> {
   private:
     sparse_elt<T> * root;
-    /////////////////////////////////////////////////
-    // used to make sure user doesn't read old roots
-    bool root_is_valid;
-    sparse_elt<T> * old_root;
-    /////////////////////////////////////////////////
 
     sparse_elt<T> * interior_search(const T & obj, sparse_elt<T> * head)
     {
@@ -155,8 +141,6 @@ class sparse_bst : public tree<T> {
   public:
 
     virtual const sparse_elt<T> * get_root() {
-      root_is_valid = true;
-      old_root = root;
       return root;
     }
 
@@ -211,7 +195,7 @@ class sparse_bst : public tree<T> {
       if(temp != nullptr)return true;
       return false;
     }
-    virtual T find(const T & obj)
+    virtual T & find(const T & obj)
     {
       sparse_elt<T> * temp = interior_search(obj, root);
       if(temp != nullptr)return temp->object;
@@ -229,7 +213,6 @@ class sparse_bst : public tree<T> {
       this->number_of_elements--;
       if(!parent) // deleting root
       {
-        root_is_valid = false;
         if(!(root->left) && !(root->right)) // size == 1
         {
           delete root;
@@ -279,13 +262,30 @@ class sparse_bst : public tree<T> {
       erase(obj, parent);
       return true;
     }
-    virtual std::string inorder(const sparse_elt<T> * head, const std::string & delim)
+    virtual std::string inorder(const std::string & delim)
     {
-      if(!root_is_valid && head == old_root) head = root; // this is assuming a user deleted the root and didn't update the root pointer
-      if(!head)return "";
       std::stringstream ss;
-      interior_inorder(head, ss, delim);
+      interior_inorder(root, ss, delim);
       std::string result = ss.str();
       return result.substr(0, result.length()-delim.length());
     }
+    virtual std::string inorder()
+    {
+      return inorder(" ");
+    }
+};
+
+template <typename T>
+class sparse_elt {
+  friend class sparse_bst<T>;
+  private:
+      T object;
+      sparse_elt * left;
+      sparse_elt * right;
+
+      sparse_elt(const T & _obj): object(_obj), left(nullptr), right(nullptr) {}
+  public:
+    const sparse_elt * get_left() { return left; }
+    const sparse_elt * get_right() { return right; }
+    const T get_value() { return object; }
 };

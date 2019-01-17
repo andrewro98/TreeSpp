@@ -20,14 +20,14 @@ int main()
   std::cout << sbst.contains(0) << std::endl;
   std::cout << sbst.find(-30) << std::endl;
   const sparse_elt<int> * root = sbst.get_root();
-  std::cout << sbst.inorder(root, " ") << std::endl;
-  std::cout << sbst.inorder(root, ", ") << std::endl;
+  std::cout << sbst.inorder(" ") << std::endl;
+  std::cout << sbst.inorder(", ") << std::endl;
   std::cout << sbst.erase(-20) << std::endl;
-  std::cout << sbst.inorder(root, ", ") << std::endl;
+  std::cout << sbst.inorder(", ") << std::endl;
   std::cout << sbst.erase(0) << std::endl;
-  std::cout << sbst.inorder(root, ", ") << std::endl;
+  std::cout << sbst.inorder(", ") << std::endl;
   std::cout << sbst.erase(1) << std::endl;
-  std::cout << sbst.inorder(root, ", ") << std::endl;
+  std::cout << sbst.inorder(", ") << std::endl;
   std::cout << sbst.erase(-30) << std::endl;
-  std::cout << sbst.inorder(root, ", ") << std::endl;
+  std::cout << sbst.inorder(", ") << std::endl;
 }
